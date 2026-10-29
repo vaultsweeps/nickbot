@@ -1,0 +1,42 @@
+{
+  "name": "telegram-support-bot",
+  "version": "1.0.0",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm test",
+    "dev": "tsx --env-file=.env scripts/dev-server.ts",
+    "webhook:set": "tsx --env-file=.env scripts/telegram-setup.ts set-webhook",
+    "webhook:info": "tsx --env-file=.env scripts/telegram-setup.ts info",
+    "webhook:delete": "tsx --env-file=.env scripts/telegram-setup.ts delete-webhook",
+    "doctor": "tsx --env-file=.env scripts/telegram-setup.ts doctor"
+  },
+  "license": "UNLICENSED",
+  "description": "Telegram customer support bot: one forum topic per customer, Supabase + Vercel",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.13",
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.6",
+    "@vercel/node": "^28.0.1",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^5.0.5"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  }
+}
