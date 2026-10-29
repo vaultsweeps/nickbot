@@ -183,8 +183,24 @@ async function handleContact(ctx: BotContext, msg: TgMessage, customer: Customer
   }
 
   const updated = await ctx.store.setCustomerPhone(customer.id, phone, ctx.now().toISOString());
-  const conv = await ctx.store.getLatestConversationForCustomer(customer.id);
-  if (conv?.forumTopicId) await syncTopicName(ctx, conv, updated);
+  let conv = await ctx.store.getLatestConversationForCustomer(customer.id);
+  if (!conv) conv = (await ctx.store.ensureConversation(customer.id, ctx.staffGroupId)).conversation;
+  // Make sure staff can see the number even if the customer has not written a message yet
+  // (a closed conversation is not reopened just for this).
+  if (conv.status === 'open') conv = await ensureTopic(ctx, conv, updated);
+  if (conv.forumTopicId) {
+    conv = await syncTopicName(ctx, conv, updated);
+    try {
+      await ctx.telegram.sendMessage({
+        chatId: conv.staffGroupId,
+        text: `📱 Customer shared their verified phone number: ${phone}`,
+        messageThreadId: conv.forumTopicId,
+      });
+    } catch (err) {
+      if (isRetryable(err)) throw err;
+      ctx.logger.warn('could not post phone number to topic', { error: err });
+    }
+  }
   await reply(ctx, chatId, texts.contactThanks, { remove_keyboard: true });
   ctx.logger.info('customer shared verified phone', {
     customerId: customer.id,
